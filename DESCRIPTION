@@ -1,11 +1,11 @@
 Package: fase
-Title: What the Package Does (One Line, Title Case)
+Title: Fitting Latent Process Models to Functional Network Data
 Version: 0.0.0.9000
 Authors@R: 
     person("Peter W.", "MacDonald", , "pwmacdon@umich.edu", role = c("aut", "cre"),
            comment = c(ORCID = "0000-0001-7024-7242"))
-Description: What the package does (one paragraph).
-License: MIT + file LICENSE
+Description: Latent process model fitting for functional network data. Fits smooth latent processes based on (B or S) spline bases. Also generates functional network data from three models, and evaluates a network generalized cross-validation criterion for dimension selection.
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.2
