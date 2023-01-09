@@ -2,12 +2,7 @@
 
 # residual matrix
 resid <- function(A,W,B_mat,self_loops){
-  if(self_loops){
-    A - WB_to_Theta(W,B_mat)
-  }
-  else{
-    hollowize3(A - WB_to_Theta(W,B_mat))
-  }
+  A - WB_to_Theta(W,B_mat,self_loops)
 }
 
 objgrad <- function(A,W,B_mat,B_pos,self_loops){

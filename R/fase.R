@@ -18,16 +18,14 @@ fase <- function(A,d,self_loops=TRUE,
     if(is.null(spline_design$q)){
       stop('must specify B-spline dimension')
     }
+    if(is.null(spline_design$x_vec)){
+      spline_design$x_vec <- seq(0,1,length.out=m)
+    }
     if(is.null(spline_design$x_min)){
-      spline_design$x_min <- 0
+      spline_design$x_min <- min(spline_design$x_vec)
     }
     if(is.null(spline_design$x_max)){
-      spline_design$x_max <- 1
-    }
-    if(is.null(spline_design$x_vec)){
-      spline_design$x_vec <- seq(spline_design$x_min,
-                                 spline_design$x_max,
-                                 length.out=m)
+      spline_design$x_max <- max(spline_design$x_vec)
     }
     # consistency of parameters
     if(spline_design$x_min > min(spline_design$x_vec) || spline_design$x_max > max(spline_design$x_vec)){

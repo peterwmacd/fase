@@ -11,11 +11,29 @@ hollowize3 <- function(A){
 }
 
 # helper which converts W and B_mat to an array of Theta = EA
-WB_to_Theta <- function(W,B_mat){
+WB_to_Theta <- function(W,B_mat,self_loops){
   dW <- dim(W)
   m <- nrow(B_mat)
-  array(apply(array(apply(W,3,function(x){x %*% t(B_mat)}),c(dW[1],m,dW[3])),2,tcrossprod),
-        c(dim(W)[1],dim(W)[1],m))
+  Theta <- array(apply(array(apply(W,3,function(x){x %*% t(B_mat)}),c(dW[1],m,dW[3])),2,tcrossprod),
+                 c(dim(W)[1],dim(W)[1],m))
+  if(self_loops){
+    return(Theta)
+  }
+  else{
+    return(hollowize3(Theta))
+  }
+}
+
+# helper which converts Z to an array of Theta = EA
+Z_to_Theta <- function(Z,self_loops){
+  Theta <- array(apply(Z,3,tcrossprod),
+        c(dim(Z)[1],dim(Z)[1],dim(Z)[3]))
+  if(self_loops){
+    return(Theta)
+  }
+  else{
+    return(hollowize3(Theta))
+  }
 }
 
 # cubic B-spline evaluation function
@@ -68,6 +86,7 @@ coord_to_snap <- function(W,B_mat){
   aperm(rTensor::ttm(rTensor::as.tensor(W),B_mat,m=2)@data,c(1,3,2))
 }
 
+# MAKE VISIBLE
 # Procrustes alignment routine
 proc_align <- function(A,B,return_rot=FALSE){
   # factorize crossproduct

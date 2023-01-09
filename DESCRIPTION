@@ -12,6 +12,8 @@ RoxygenNote: 7.1.2
 URL: https://github.com/peterwmacd/fase
 BugReports: https://github.com/peterwmacd/fase/issues
 Imports: 
+    MCMCpack,
     RSpectra,
     rTensor,
-    splines2
+    splines2,
+    stats
