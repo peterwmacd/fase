@@ -27,7 +27,7 @@ WB_to_Theta <- function(W,B_mat,self_loops){
 # helper which converts Z to an array of Theta = EA
 Z_to_Theta <- function(Z,self_loops){
   Theta <- array(apply(Z,3,tcrossprod),
-        c(dim(Z)[1],dim(Z)[1],dim(Z)[3]))
+                 c(dim(Z)[1],dim(Z)[1],dim(Z)[3]))
   if(self_loops){
     return(Theta)
   }
@@ -102,6 +102,22 @@ proc_align <- function(A,B,return_rot=FALSE){
   }
 }
 
+# MAKE VISIBLE
+# proc_align after matricizing in 3rd mode
+proc_align3 <- function(A,B,return_rot=FALSE){
+  matricize_align <- proc_align(t(rTensor::k_unfold(rTensor::as.tensor(B),m=3)@data),
+                                t(rTensor::k_unfold(rTensor::as.tensor(A),m=3)@data),
+                                return_rot=TRUE)
+  rot <- matricize_align$rot
+  A_rot <- rTensor::ttm(rTensor::as.tensor(A),rot,m=3)@data
+  if(return_rot){
+    return(list(Ar=A_rot,rot=rot))
+  }
+  else{
+    return(A_rot)
+  }
+}
+
 # helper to convert (n x d x m) snapshots to (n x q x d) smoothed coordinates
 B_smooth <- function(Z,B_mat){
   aperm(rTensor::ttm(rTensor::as.tensor(Z),solve(crossprod(B_mat),t(B_mat)),m=3)@data,c(1,3,2))
@@ -137,7 +153,7 @@ Z_align_proc <- function(Z,orth1=FALSE){
 ss_ridge <- function(spline_design){
   # extended natural spline matrix for approximating
   m <- length(spline_design$x_vec)
-  m_ext <- 1e3+1
+  m_ext <- max(1e3+1,m)
   x_vec_ext <- seq(spline_design$x_min,spline_design$x_max,length.out=m_ext)
   # approximation of ridge matrix
   Spp_mat <- splines2::naturalSpline(x_vec_ext,
