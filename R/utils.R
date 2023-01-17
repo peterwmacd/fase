@@ -86,35 +86,90 @@ coord_to_snap <- function(W,B_mat){
   aperm(rTensor::ttm(rTensor::as.tensor(W),B_mat,m=2)@data,c(1,3,2))
 }
 
-# MAKE VISIBLE
-# Procrustes alignment routine
-proc_align <- function(A,B,return_rot=FALSE){
+#' Procrustes alignment
+#'
+#' \code{proc_align} orthogonally transforms the columns of a matrix \eqn{A} to
+#' find the best approximation (in terms of Frobenius norm) to a
+#' second matrix \eqn{B}. Optionally, it may also return the optimal transformation
+#' matrix.
+#'
+#' @usage
+#' proc_align(A,B,return_orth=FALSE)
+#'
+#' @param A An \eqn{n \times d} matrix.
+#' @param B An \eqn{n \times d} matrix.
+#' @param return_orth A Boolean which specifies whether to return the
+#' orthogonal transformation.
+#' Defaults to \code{FALSE}.
+#'
+#' @return If \code{return_orth} is \code{FALSE}, returns the \eqn{n \times d}
+#' matrix resulting from applying the optimal aligning transformation to
+#' the columns of \code{A}.
+#' Otherwise, returns a list with two entries:
+#' \item{Ao}{The \eqn{n \times d}
+#' matrix resulting from applying the optimal aligning transformation to the
+#' columns of \code{A}.}
+#' \item{orth}{The \eqn{d \times d} optimal aligning orthogonal transformation
+#' matrix.}
+#'
+#'
+#' @export
+proc_align <- function(A,B,return_orth=FALSE){
   # factorize crossproduct
   temp <- svd(crossprod(A,B))
-  # get rotation
-  rot <- tcrossprod(temp$u,temp$v)
-  A_rot <- A %*% rot
-  if(return_rot){
-    return(list(Ar=A_rot,rot=rot))
+  # get transformation
+  orth <- tcrossprod(temp$u,temp$v)
+  A_orth <- A %*% orth
+  if(return_orth){
+    return(list(Ao=A_orth,orth=orth))
   }
   else{
-    return(A_rot)
+    return(A_orth)
   }
 }
 
-# MAKE VISIBLE
-# proc_align after matricizing in 3rd mode
-proc_align3 <- function(A,B,return_rot=FALSE){
+#' Procrustes alignment for 3-mode tensors
+#'
+#' \code{proc_align3} applies one orthogonal transformation
+#' to the columns of each of the \eqn{n \times d} slices of an
+#' \eqn{n \times d \times m} array \eqn{A} to
+#' find the best approximation (in terms of matrix Frobenius norm, averaged
+#' over the  \eqn{n \times d} slices) to a
+#' second \eqn{n \times d \times m} array \eqn{B}.
+#' Optionally, it may also return the optimal transformation
+#' matrix.
+#'
+#' @usage
+#' proc_align3(A,B,return_orth=FALSE)
+#'
+#' @param A An \eqn{n \times d \times m} array.
+#' @param B An \eqn{n \times d \times m} array.
+#' @param return_orth A Boolean which specifies whether to return the
+#' orthogonal transformation.
+#' Defaults to \code{FALSE}.
+#'
+#' @return If \code{return_orth} is \code{FALSE}, returns the \eqn{n \times d \times m}
+#' array resulting from applying the optimal aligning transformation to
+#' the columns of the \eqn{n \times d} slices of \code{A}.
+#' Otherwise, returns a list with two entries:
+#' \item{Ao}{The \eqn{n \times d}
+#' matrix resulting from applying the optimal aligning transformation to the
+#' columns of the \eqn{n \times d} slices of \code{A}.}
+#' \item{orth}{The \eqn{d \times d} optimal aligning orthogonal transformation matrix.}
+#'
+#'
+#' @export
+proc_align3 <- function(A,B,return_orth=FALSE){
   matricize_align <- proc_align(t(rTensor::k_unfold(rTensor::as.tensor(B),m=3)@data),
                                 t(rTensor::k_unfold(rTensor::as.tensor(A),m=3)@data),
-                                return_rot=TRUE)
-  rot <- matricize_align$rot
-  A_rot <- rTensor::ttm(rTensor::as.tensor(A),rot,m=3)@data
-  if(return_rot){
-    return(list(Ar=A_rot,rot=rot))
+                                return_orth=TRUE)
+  orth <- matricize_align$orth
+  A_orth <- rTensor::ttm(rTensor::as.tensor(A),orth,m=3)@data
+  if(return_orth){
+    return(list(Ao=A_orth,orth=orth))
   }
   else{
-    return(A_rot)
+    return(A_orth)
   }
 }
 
@@ -135,8 +190,8 @@ Z_align_proc <- function(Z,orth1=FALSE){
   m <- dim(Z)[3]
   temp <- array(NA,dim(Z))
   if(orth1){
-    orthrot <- svd(Z[,,1])$v
-    temp[,,1] <- Z[,,1] %*% orthrot
+    orth <- svd(Z[,,1])$v
+    temp[,,1] <- Z[,,1] %*% orth
   }
   else{
     temp[,,1] <- Z[,,1]

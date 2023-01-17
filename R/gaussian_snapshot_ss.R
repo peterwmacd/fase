@@ -7,6 +7,8 @@ process_nonpar <- function(n,d,x_vec,
                            frequency){
   # dimensions
   m <- length(x_vec)
+  x_min <- min(x_vec)
+  x_max <- max(x_vec)
   # scaled trig functions:
   # fixed parameters
   # minimum amplitude, intercept sd
@@ -16,14 +18,14 @@ process_nonpar <- function(n,d,x_vec,
   for(ii in 1:n){
     for(rr in 1:d){
       # intercept
-      G <- rnorm(1,sd=int_sd)
+      G <- stats::rnorm(1,sd=int_sd)
       # increase/decrease amplitude
-      B <- rbinom(1,1,.5)
+      B <- stats::rbinom(1,1,.5)
       # sin x-intercepts
-      U <- runif(1)
+      U <- stats::runif(1,min=x_min,max=x_max)
       # function
       temp <- function(x){
-        ((amplitude*(sin(6.28*(frequency*x - U))))/(1 + ((amplitude/amp_min) - 1)*(x + B*(1-2*x)))) + G
+        ((amplitude*(sin(6.28*frequency*(x - U))))/(1 + ((amplitude/amp_min) - 1)*(x + B*(x_max-2*x)))) + G
       }
       # populate
       out[ii,rr,] <- temp(x_vec)
@@ -32,6 +34,85 @@ process_nonpar <- function(n,d,x_vec,
   return(out)
 }
 
+#' Simulate Gaussian edge networks with nonparametric latent processes
+#'
+#' \code{gaussian_snapshot_ss} simulates a realization of a functional network
+#' with Gaussian edges, according to an inner product latent process model.
+#' The latent processes are randomly generated sinusoidal functions.
+#'
+#' The each component of the latent process for node \eqn{i} is given independently by
+#' \deqn{z_{i,r}(x) = \frac{a \sin ( 2f\pi(x - U) )}{1 + (2a-1)(x + B(x_{max} - 2x))} + G}
+#' Where \eqn{G} is Gaussian with mean \code{0} and standard deviation
+#' \code{1/2}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
+#' with minimum \code{spline_design$x_min} and maximum \code{spline_design$x_max}.
+#' \eqn{f} is a frequency parameter specified with
+#' \code{process_options$frequency}, and \eqn{a} is a maximum amplitude parameter
+#' specified with \code{process_options$amplitude}.
+#' Roughly, each process is a randomly shifted sine function which goes through
+#' \code{f} cycles on the index set, with amplitude either increasing or
+#' decreasing between \eqn{1/2} and \eqn{a}.
+#'
+#' Then, the \eqn{n \times n} symmetric adjacency matrix for
+#' snapshot \eqn{k=1,...,m} has independent Gaussian entries
+#' with standard deviation \code{sigma_edge} and mean
+#' \deqn{E([A_k]_{ij}) = z_i(x_k)^{T}z_j(x_k)}
+#' for \eqn{i \leq j} (or \eqn{i < j} with no self loops).
+#'
+#' This function may return the latent processes as an \eqn{n \times d \times m}
+#' array evaluated at the prespecified snapshot times, or as a function which
+#' takes a vector of indices and returns the latent process matrices evaluated
+#' at those snapshot times.
+#' It also returns the spline design information required to
+#' fit a FASE embedding to this data with a natural cubic spline.
+#'
+#' @usage
+#' gaussian_snapshot_ss(n,d,m,x_vec,self_loops,sigma_edge,process_options)
+#'
+#' @param n A positive integer, the number of nodes.
+#' @param d A positive integer, the number of latent space dimensions.
+#' @param m A positive integer, the number of snapshots.
+#' If this argument is not specified, it
+#' is determined from the snapshot time vector \code{x_vec}.
+#' @param x_vec A vector, the snapshot evaluation times for the data.
+#' Defaults to an equally spaced sequence of length
+#' \code{m} from \code{0} to \code{1}.
+#' @param self_loops A Boolean, if \code{FALSE}, all diagonal adjacency matrix
+#' entries are set to zero. Defaults to \code{TRUE}.
+#' @param sigma_edge A positive scalar,
+#' the entry-wise standard deviation for the Gaussian edge variables.
+#' Defaults to \code{1}.
+#' @param process_options A list, containing additional optional arguments:
+#' \describe{
+#'     \item{amplitude}{A positive scalar, the maximum amplitude of the
+#'     randomly generated latent processes. Defaults to \code{3}.}
+#'     \item{frequency}{A positive scalar, frequency of the randomly
+#'     generated latent processes. Defaults to \code{2}.}
+#'     \item{return_fn}{A Boolean, if \code{TRUE}, then the latent processes
+#'     are returned as a function which
+#'     takes a vector of indices and returns the latent process matrices evaluated
+#'     at those snapshot times. Otherwise, the latent processes are returned
+#'     as an \eqn{n \times d \times m} array evaluated at the prespecified
+#'     snapshot times. Defaults to \code{FALSE}.}
+#' }
+#'
+#'
+#'
+#' @return A list is returned with the realizations of the basis coordinates,
+#' spline design, and the multiplex network snapshots:
+#' \item{A}{An array of dimension \eqn{n \times n \times m}, the realized
+#' functional network data.}
+#' \item{Z}{If \code{process_options$return_fn} is \code{TRUE}, a function,
+#' which takes a vector of indices and returns the latent process matrices evaluated
+#' at those snapshot times. Otherwise, an array of dimension \eqn{n \times d \times m},
+#' the latent processes evaluated at the prespecified
+#' snapshot times.}
+#' \item{spline_design}{A list, describing the \eqn{B}-spline design:
+#' \describe{
+#'     \item{type}{The string \code{'ss'}.}
+#'     \item{x_vec}{A vector, the snapshot evaluation times for the data.}
+#' }}
+#'
+#' @export
 gaussian_snapshot_ss <- function(n,d,
                                  m=NULL,x_vec=NULL,
                                  self_loops=TRUE,
@@ -83,7 +164,7 @@ gaussian_snapshot_ss <- function(n,d,
   else{
     Z <- Z_array
   }
-  out <- list(A=A,Z=Z,spline_design=list(type='ss',x_vec=x_vec))
+  out <- list(A=A,Z=Z,spline_design=spline_design)
   return(out)
 }
 

@@ -136,7 +136,7 @@ fase <- function(A,d,self_loops=TRUE,
                      optim_options$K_max,
                      ridge=TRUE,
                      ridge_mat=spline_design$ridge_mat,
-                     ridge_pen=lambda,
+                     ridge_pen=lambda/n,
                      verbose=optim_options$verbose)
   }
 
