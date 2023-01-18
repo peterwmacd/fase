@@ -160,11 +160,11 @@ proc_align <- function(A,B,return_orth=FALSE){
 #'
 #' @export
 proc_align3 <- function(A,B,return_orth=FALSE){
-  matricize_align <- proc_align(t(rTensor::k_unfold(rTensor::as.tensor(B),m=3)@data),
-                                t(rTensor::k_unfold(rTensor::as.tensor(A),m=3)@data),
+  matricize_align <- proc_align(t(rTensor::k_unfold(rTensor::as.tensor(B),m=2)@data),
+                                t(rTensor::k_unfold(rTensor::as.tensor(A),m=2)@data),
                                 return_orth=TRUE)
   orth <- matricize_align$orth
-  A_orth <- rTensor::ttm(rTensor::as.tensor(A),orth,m=3)@data
+  A_orth <- rTensor::ttm(rTensor::as.tensor(A),orth,m=2)@data
   if(return_orth){
     return(list(Ao=A_orth,orth=orth))
   }
@@ -172,6 +172,36 @@ proc_align3 <- function(A,B,return_orth=FALSE){
     return(A_orth)
   }
 }
+
+#' Slicewise Procrustes alignment for 3-mode tensors
+#'
+#' \code{proc_align_slicewise3} applies an orthogonal transformation
+#' to the columns of each of the \eqn{n \times d} slices of an
+#' \eqn{n \times d \times m} array \eqn{A} to
+#' find the best approximation (in terms of matrix Frobenius norm) to
+#' the corresponding \eqn{n \times d} slice of a
+#' second \eqn{n \times d \times m} array \eqn{B}.
+#'
+#' @usage
+#' proc_align_slicewise3(A,B)
+#'
+#' @param A An \eqn{n \times d \times m} array.
+#' @param B An \eqn{n \times d \times m} array.
+#'
+#' @return Returns the \eqn{n \times d \times m}
+#' array resulting from applying the optimal aligning transformations to
+#' the columns of the \eqn{n \times d} slices of \code{A}.
+#'
+#'
+#' @export
+proc_align_slicewise3 <- function(A,B){
+  A_rot <- array(NA,dim(A))
+  for(ii in 1:dim(A)[3]){
+    A_rot[,,ii] <- proc_align(A[,,ii],B[,,ii])
+  }
+  return(A_rot)
+}
+
 
 # helper to convert (n x d x m) snapshots to (n x q x d) smoothed coordinates
 B_smooth <- function(Z,B_mat){
