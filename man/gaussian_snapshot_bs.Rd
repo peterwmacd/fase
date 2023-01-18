@@ -82,3 +82,15 @@ with standard deviation \code{sigma_edge} and mean
 \deqn{E([A_k]_{ij}) = z_i(x_k)^{T}z_j(x_k)}
 for \eqn{i \leq j} (or \eqn{i < j} with no self loops).
 }
+\examples{
+
+# Gaussian edge data with B-spline latent processes, Gaussian coordinates
+# NOTE: x_vec is automatically populated given m
+
+data <- gaussian_snapshot_bs(n=100,d=4,m=100,
+                             self_loops=FALSE,
+                             spline_design=list(q=12),
+                             sigma_edge=3,
+                             process_options=list(sigma_coord=.75))
+
+}

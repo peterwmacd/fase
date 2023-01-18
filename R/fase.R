@@ -185,6 +185,27 @@
 #' gradient descent converged in fewer than \code{optim_options$K_max} iterations,
 #' \code{1} otherwise.}
 #'
+#' @examples
+#' # Gaussian edge data with sinusoidal latent processes
+#' set.seed(1)
+#' data <- gaussian_snapshot_ss(n=100,d=2,
+#'                              x_vec=seq(0,1,length.out=50),
+#'                              self_loops=FALSE,sigma_edge=4)
+#'
+#'
+#' # fase fit with B-spline design
+#' fit_bs <- fase(data$A,d=2,self_loops=FALSE,
+#'                spline_design=list(type='bs',q=9,x_vec=data$spline_design$x_vec),
+#'                optim_options=list(eps=1e-4,K_max=4e3,init_q=12),
+#'                output_options=list(return_coords=TRUE))
+#'
+#' # fase fit with smoothing spline design
+#' fit_ss <- fase(data$A,d=2,self_loops=FALSE,
+#'                spline_design=list(type='ss',x_vec=data$spline_design$x_vec),
+#'                lambda=.5,
+#'                optim_options=list(eta=1e-4,verbose=FALSE),
+#'                output_options=list(align_output=FALSE,return_fn=TRUE))
+#'
 #' @export
 fase <- function(A,d,self_loops=TRUE,
                  spline_design=list(),
@@ -295,8 +316,10 @@ fase <- function(A,d,self_loops=TRUE,
   if(optim_options$init_q > m){
     stop('invalid choice of initial q (too large)')
   }
-  if((spline_design$type=='bs' & optim_options$init_q < spline_design$q) || optim_options$init_q < 4){
-    stop('invalid choice of initial q (too small)')
+  if(spline_design$type=='bs'){
+    if((optim_options$init_q < spline_design$q) || (optim_options$init_q < 4)){
+      stop('invalid choice of initial q (too small)')
+    }
   }
   # initialization
   W_init <- kern_orth_embed(A,d,

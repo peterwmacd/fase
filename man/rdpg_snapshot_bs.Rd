@@ -92,3 +92,18 @@ with mean
 \deqn{E([A_k]_{ij}) = z_i(x_k)^{T}z_j(x_k)}
 for \eqn{i \leq j} (or \eqn{i < j} with no self loops).
 }
+\examples{
+
+# Bernoulli edge data with B-spline latent processes, Dirichlet coordinates
+# NOTE: for B-splines, x_max and x_min do not need to coincide with the
+# max and min snapshot times.
+
+data <- rdpg_snapshot_bs(n=100,d=10,
+                         self_loops=FALSE,
+                         spline_design=list(q=8,
+                                            x_vec=seq(-1,1,length.out=50),
+                                            x_min=-1.1,x_max=1.1),
+                         process_options=list(alpha_coord=.2,
+                         density=1/10))
+
+}

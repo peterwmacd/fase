@@ -11,15 +11,19 @@ kern_orth_embed <- function(A,d,
                     spline_design$x_max)(spline_design$x_vec)
     xq_vec <- spline_design$x_vec[apply(B_mat,2,which.max)]
     Bq_mat <- B_func(init_q,
-                    spline_design$x_min,
-                    spline_design$x_max)(xq_vec)
+                     spline_design$x_min,
+                     spline_design$x_max)(xq_vec)
 
   }
   else{
     if(init_q==spline_design$q){
+      B_mat <- spline_design$spline_mat
       xq_vec <- spline_design$x_vec[apply(spline_design$spline_mat,2,which.max)]
     }
     else{
+      B_mat <- B_func(init_q,
+                      spline_design$x_min,
+                      spline_design$x_max)(spline_design$x_vec)
       xq_vec <- seq(spline_design$x_min,
                     spline_design$x_max,
                     length.out=init_q)
@@ -42,7 +46,7 @@ kern_orth_embed <- function(A,d,
     temp <- ase(apply(A[,,close],c(1,2),mean),d,positive=TRUE)
     # get permutation
     if(is.matrix(temp)){
-        Zq_hat[,,ll] <- proc_align(temp,Zq_hat[,,ll-1])
+      Zq_hat[,,ll] <- proc_align(temp,Zq_hat[,,ll-1])
     }
     else{
       Zq_hat[,,ll] <- temp * sign(sum(temp*Zq_hat[,,ll-1]))
@@ -55,7 +59,12 @@ kern_orth_embed <- function(A,d,
     W_hat <- B_translate(Wq_hat,B_mat,spline_design$spline_mat)
   }
   else{
-    W_hat <- Wq_hat
+    if(init_q==spline_design$q){
+      W_hat <- Wq_hat
+    }
+    else{
+      W_hat <- B_translate(Wq_hat,B_mat,spline_design$spline_mat)
+    }
   }
   return(W_hat)
 }

@@ -257,21 +257,25 @@ ss_ridge <- function(spline_design){
 coord_to_func <- function(W,spline_design){
   # define a function of a possible vector x
   Z <- function(x){
+    Z_temp <- array(0,c(dim(W)[1],dim(W)[3],length(x)))
+    x_sub <- ((x >= spline_design$x_min) & (x <= spline_design$x_max))
+    if(sum(x_sub) > 0){
     # B-spline new design matrix
     if(spline_design$type=='bs'){
       spline_mat_temp <- B_func(spline_design$q,
                                 spline_design$x_min,
-                                spline_design$x_max)(x)
+                                spline_design$x_max)(x[x_sub])
     }
     # S-spline new design matrix
     else{
       m <- length(spline_design$x_vec)
-      spline_mat_temp <- splines2::naturalSpline(x,
+      spline_mat_temp <- splines2::naturalSpline(x[x_sub],
                                                  intercept=TRUE,
                                                  knots=spline_design$x_vec[2:(m-1)],
                                                  Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
     }
-    Z_temp <- coord_to_snap(W,spline_mat_temp)
+    Z_temp[,,x_sub] <- coord_to_snap(W,spline_mat_temp)
+    }
     return(Z_temp)
   }
   return(Z)

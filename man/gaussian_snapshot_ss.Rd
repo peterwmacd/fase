@@ -63,7 +63,7 @@ The latent processes are randomly generated sinusoidal functions.
 }
 \details{
 The each component of the latent process for node \eqn{i} is given independently by
-\deqn{z_{i,r}(x) = \frac{a \sin ( 2f\pi(x - U) )}{1 + (2a-1)(x + B(x_{max} - 2x))} + G}
+\deqn{z_{i,r}(x) = \frac{a \sin [2f\pi(x - U) / (x_{max} - x_{min})]}{1 + (2a-1)[x + B(x_{max} - 2x)]} + G}
 Where \eqn{G} is Gaussian with mean \code{0} and standard deviation
 \code{1/2}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
 with minimum \code{spline_design$x_min} and maximum \code{spline_design$x_max}.
@@ -86,4 +86,18 @@ takes a vector of indices and returns the corresponding evaluations of
 the latent process matrices.
 It also returns the spline design information required to
 fit a FASE embedding to this data with a natural cubic spline.
+}
+\examples{
+
+# Gaussian edge data with sinusoidal latent processes
+# NOTE: latent processes are returned as a function
+
+data <- gaussian_snapshot_ss(n=100,d=2,
+                             x_vec=seq(0,3,length.out=80),
+                             self_loops=TRUE,
+                             sigma_edge=4,
+                             process_options=list(amplitude=4,
+                                                  frequency=3,
+                                                  return_fn=TRUE))
+
 }

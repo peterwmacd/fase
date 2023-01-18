@@ -71,6 +71,17 @@
 #'     evaluated at the snapshot indices.}
 #' }}
 #'
+#' @examples
+#'
+#' # Gaussian edge data with B-spline latent processes, Gaussian coordinates
+#' # NOTE: x_vec is automatically populated given m
+#'
+#' data <- gaussian_snapshot_bs(n=100,d=4,m=100,
+#'                              self_loops=FALSE,
+#'                              spline_design=list(q=12),
+#'                              sigma_edge=3,
+#'                              process_options=list(sigma_coord=.75))
+#'
 #' @export
 gaussian_snapshot_bs <- function(n,d,
                                  m=NULL,
@@ -100,7 +111,7 @@ gaussian_snapshot_bs <- function(n,d,
     spline_design$x_max <- max(spline_design$x_vec)
   }
   # consistency of parameters
-  if(spline_design$x_min > min(spline_design$x_vec) || spline_design$x_max > max(spline_design$x_vec)){
+  if(spline_design$x_min > min(spline_design$x_vec) || spline_design$x_max < max(spline_design$x_vec)){
     stop('inconsistent index space')
   }
   if(spline_design$q > m || spline_design$q < 4){

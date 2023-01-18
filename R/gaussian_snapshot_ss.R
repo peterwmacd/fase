@@ -25,7 +25,7 @@ process_nonpar <- function(n,d,x_vec,
       U <- stats::runif(1,min=x_min,max=x_max)
       # function
       temp <- function(x){
-        ((amplitude*(sin(6.28*frequency*(x - U))))/(1 + ((amplitude/amp_min) - 1)*(x + B*(x_max-2*x)))) + G
+        ((amplitude*(sin(6.28*(frequency/(x_max-x_min))*(x - U))))/(1 + ((amplitude/amp_min) - 1)*(x + B*(x_max-2*x)))) + G
       }
       # populate
       out[ii,rr,] <- temp(x_vec)
@@ -41,7 +41,7 @@ process_nonpar <- function(n,d,x_vec,
 #' The latent processes are randomly generated sinusoidal functions.
 #'
 #' The each component of the latent process for node \eqn{i} is given independently by
-#' \deqn{z_{i,r}(x) = \frac{a \sin ( 2f\pi(x - U) )}{1 + (2a-1)(x + B(x_{max} - 2x))} + G}
+#' \deqn{z_{i,r}(x) = \frac{a \sin [2f\pi(x - U) / (x_{max} - x_{min})]}{1 + (2a-1)[x + B(x_{max} - 2x)]} + G}
 #' Where \eqn{G} is Gaussian with mean \code{0} and standard deviation
 #' \code{1/2}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
 #' with minimum \code{spline_design$x_min} and maximum \code{spline_design$x_max}.
@@ -112,6 +112,19 @@ process_nonpar <- function(n,d,x_vec,
 #'     \item{x_vec}{A vector, the snapshot evaluation indices for the data.}
 #' }}
 #'
+#' @examples
+#'
+#' # Gaussian edge data with sinusoidal latent processes
+#' # NOTE: latent processes are returned as a function
+#'
+#' data <- gaussian_snapshot_ss(n=100,d=2,
+#'                              x_vec=seq(0,3,length.out=80),
+#'                              self_loops=TRUE,
+#'                              sigma_edge=4,
+#'                              process_options=list(amplitude=4,
+#'                                                   frequency=3,
+#'                                                   return_fn=TRUE))
+#'
 #' @export
 gaussian_snapshot_ss <- function(n,d,
                                  m=NULL,x_vec=NULL,
@@ -156,7 +169,7 @@ gaussian_snapshot_ss <- function(n,d,
     A[,,kk] <- A[,,kk]+E
   }
   # populate output
-  spline_design <- list(type='ss',x_vec=x_vec)
+  spline_design <- list(type='ss',x_vec=x_vec,x_min=min(x_vec),x_max=max(x_vec))
   # if specified, interpolate to get functional output
   if(process_options$return_fn){
     Z <- coord_to_func(aperm(Z_array,c(1,3,2)),spline_design)

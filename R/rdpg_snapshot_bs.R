@@ -102,6 +102,20 @@ coord_rdpg <- function(n,q,d,
 #'     evaluated at the snapshot indices.}
 #' }}
 #'
+#' @examples
+#'
+#' # Bernoulli edge data with B-spline latent processes, Dirichlet coordinates
+#' # NOTE: for B-splines, x_max and x_min do not need to coincide with the
+#' # max and min snapshot times.
+#'
+#' data <- rdpg_snapshot_bs(n=100,d=10,
+#'                          self_loops=FALSE,
+#'                          spline_design=list(q=8,
+#'                                             x_vec=seq(-1,1,length.out=50),
+#'                                             x_min=-1.1,x_max=1.1),
+#'                          process_options=list(alpha_coord=.2,
+#'                          density=1/10))
+#'
 #' @export
 rdpg_snapshot_bs <- function(n,d,
                              m=NULL,
@@ -130,7 +144,7 @@ rdpg_snapshot_bs <- function(n,d,
     spline_design$x_max <- max(spline_design$x_vec)
   }
   # consistency of parameters
-  if(spline_design$x_min > min(spline_design$x_vec) || spline_design$x_max > max(spline_design$x_vec)){
+  if(spline_design$x_min > min(spline_design$x_vec) || spline_design$x_max < max(spline_design$x_vec)){
     stop('inconsistent index space')
   }
   if(spline_design$q > m || spline_design$q < 4){

@@ -13,6 +13,9 @@ basis. The fase package has options to fit either B-spline (with equally
 spaced knots) or smoothing spline latent processes. For more details,
 see [MacDonald et al., (2022+)](https://arxiv.org/abs/2210.07491).
 
+Additional functions are included in this package to do Procrustes
+alignments of latent processes stored as 3-dimensional arrays.
+
 ## Installation
 
 You can install the development version of fase from
