@@ -5,6 +5,7 @@ resid <- function(A,W,B_mat,self_loops){
   A - WB_to_Theta(W,B_mat,self_loops)
 }
 
+# objective and gradient calculations
 objgrad <- function(A,W,B_mat,B_pos,self_loops){
   # dims
   dW <- dim(W)
@@ -40,6 +41,7 @@ objgrad <- function(A,W,B_mat,B_pos,self_loops){
   return(list(obj=obj,grad=(-4)*temp))
 }
 
+# objective and gradient for generalized ridge component
 objgrad_ridge <- function(W,G,lambda){
   # matrix calculations
   wg2 <- apply(W,c(1,3),function(v){

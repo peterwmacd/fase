@@ -13,7 +13,7 @@ rdpg_snapshot_bs(n,d,m,self_loops,spline_design,process_options)
 
 \item{m}{A positive integer, the number of snapshots.
 If this argument is not specified, it
-is determined from the snapshot time vector \code{spline_design$x_vec}.}
+is determined from the snapshot index vector \code{spline_design$x_vec}.}
 
 \item{self_loops}{A Boolean, if \code{FALSE}, all diagonal adjacency matrix
 entries are set to zero. Defaults to \code{TRUE}.}
@@ -22,7 +22,7 @@ entries are set to zero. Defaults to \code{TRUE}.}
 \describe{
 \item{q}{A positive integer, the dimension of the \eqn{B}-spline basis.
 Must be at least \code{4} and at most \code{m}.}
-\item{x_vec}{A vector, the snapshot evaluation times for the data.
+\item{x_vec}{A vector, the snapshot evaluation indices for the data.
 Defaults to an equally spaced sequence of length
 \code{m} from \code{0} to \code{1}.}
 \item{x_max}{A scalar, the maximum of the index space.
@@ -52,11 +52,11 @@ the realized basis coordinates.}
 \describe{
 \item{type}{The string \code{'bs'}.}
 \item{q}{A positive integer, the dimension of the \eqn{B}-spline basis.}
-\item{x_vec}{A vector, the snapshot evaluation times for the data.}
+\item{x_vec}{A vector, the snapshot evaluation indices for the data.}
 \item{x_max}{A scalar, the maximum of the index space.}
 \item{x_min}{A scalar, the minimum of the index space.}
 \item{spline_matrix}{An \eqn{m \times q} matrix, the B-spline basis
-evaluated at the snapshot times.}
+evaluated at the snapshot indices.}
 }}
 }
 \description{
@@ -66,7 +66,7 @@ The latent processes are generated from a \eqn{B}-spline basis with equally
 spaced knots.
 }
 \details{
-The spline design of the functional network data (snapshot times,
+The spline design of the functional network data (snapshot indices,
 basis dimension) is generated using the information provided in
 \code{spline_design}, producing a \eqn{q}-dimensional cubic
 \eqn{B}-spline basis with equally spaced knots.

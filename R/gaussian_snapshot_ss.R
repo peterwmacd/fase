@@ -59,9 +59,9 @@ process_nonpar <- function(n,d,x_vec,
 #' for \eqn{i \leq j} (or \eqn{i < j} with no self loops).
 #'
 #' This function may return the latent processes as an \eqn{n \times d \times m}
-#' array evaluated at the prespecified snapshot times, or as a function which
-#' takes a vector of indices and returns the latent process matrices evaluated
-#' at those snapshot times.
+#' array evaluated at the prespecified snapshot indices, or as a function which
+#' takes a vector of indices and returns the corresponding evaluations of
+#' the latent process matrices.
 #' It also returns the spline design information required to
 #' fit a FASE embedding to this data with a natural cubic spline.
 #'
@@ -72,8 +72,8 @@ process_nonpar <- function(n,d,x_vec,
 #' @param d A positive integer, the number of latent space dimensions.
 #' @param m A positive integer, the number of snapshots.
 #' If this argument is not specified, it
-#' is determined from the snapshot time vector \code{x_vec}.
-#' @param x_vec A vector, the snapshot evaluation times for the data.
+#' is determined from the snapshot index vector \code{x_vec}.
+#' @param x_vec A vector, the snapshot evaluation indices for the data.
 #' Defaults to an equally spaced sequence of length
 #' \code{m} from \code{0} to \code{1}.
 #' @param self_loops A Boolean, if \code{FALSE}, all diagonal adjacency matrix
@@ -89,10 +89,10 @@ process_nonpar <- function(n,d,x_vec,
 #'     generated latent processes. Defaults to \code{2}.}
 #'     \item{return_fn}{A Boolean, if \code{TRUE}, then the latent processes
 #'     are returned as a function which
-#'     takes a vector of indices and returns the latent process matrices evaluated
-#'     at those snapshot times. Otherwise, the latent processes are returned
+#'     takes a vector of indices and returns the corresponding evaluations of
+#'     the latent process matrices. Otherwise, the latent processes are returned
 #'     as an \eqn{n \times d \times m} array evaluated at the prespecified
-#'     snapshot times. Defaults to \code{FALSE}.}
+#'     snapshot indices. Defaults to \code{FALSE}.}
 #' }
 #'
 #'
@@ -102,14 +102,14 @@ process_nonpar <- function(n,d,x_vec,
 #' \item{A}{An array of dimension \eqn{n \times n \times m}, the realized
 #' functional network data.}
 #' \item{Z}{If \code{process_options$return_fn} is \code{TRUE}, a function,
-#' which takes a vector of indices and returns the latent process matrices evaluated
-#' at those snapshot times. Otherwise, an array of dimension \eqn{n \times d \times m},
+#' which takes a vector of indices and returns the corresponding evaluations of
+#' the latent process matrices. Otherwise, an array of dimension \eqn{n \times d \times m},
 #' the latent processes evaluated at the prespecified
-#' snapshot times.}
+#' snapshot indices.}
 #' \item{spline_design}{A list, describing the \eqn{B}-spline design:
 #' \describe{
 #'     \item{type}{The string \code{'ss'}.}
-#'     \item{x_vec}{A vector, the snapshot evaluation times for the data.}
+#'     \item{x_vec}{A vector, the snapshot evaluation indices for the data.}
 #' }}
 #'
 #' @export
