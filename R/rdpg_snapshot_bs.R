@@ -4,7 +4,11 @@ coord_rdpg <- function(n,q,d,
                        alpha,density){
   W <- array(0,c(n,q,d))
   for(ii in 1:n){
-    temp <- MCMCpack::rdirichlet(q,rep(alpha,d))
+    # generate Dirichlet variables
+    # matrix of independent chi-square ( == gamma(alpha,2) ) rvs
+    vv <- matrix(stats::rchisq(q*d,2*alpha),nrow=q)
+    # rescale rows to d-dimensional simplex
+    temp <- vv / rowSums(vv)
     normalizer <- max(sqrt(rowSums((B_mat %*% temp)^2)))
     if(normalizer > 1){
       tempnorm <- temp/normalizer
