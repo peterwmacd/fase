@@ -201,7 +201,7 @@ for \eqn{q} and \eqn{d}.
 \examples{
 # Gaussian edge data with sinusoidal latent processes
 set.seed(1)
-data <- gaussian_snapshot_ss(n=100,d=2,
+data <- gaussian_snapshot_ss(n=50,d=2,
                              x_vec=seq(0,1,length.out=50),
                              self_loops=FALSE,sigma_edge=4)
 
@@ -209,14 +209,16 @@ data <- gaussian_snapshot_ss(n=100,d=2,
 # fase fit with B-spline design
 fit_bs <- fase(data$A,d=2,self_loops=FALSE,
                spline_design=list(type='bs',q=9,x_vec=data$spline_design$x_vec),
-               optim_options=list(eps=1e-4,K_max=4e3,init_q=12),
+               optim_options=list(eps=1e-4,K_max=40,init_q=12),
                output_options=list(return_coords=TRUE))
 
 # fase fit with smoothing spline design
 fit_ss <- fase(data$A,d=2,self_loops=FALSE,
                spline_design=list(type='ss',x_vec=data$spline_design$x_vec),
                lambda=.5,
-               optim_options=list(eta=1e-4,verbose=FALSE),
+               optim_options=list(eta=1e-4,K_max=40,verbose=FALSE),
                output_options=list(align_output=FALSE,return_fn=TRUE))
+
+#NOTE: both models fit with small optim_options$K_max=40 for demonstration
 
 }

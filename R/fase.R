@@ -206,7 +206,7 @@
 #'                optim_options=list(eta=1e-4,K_max=40,verbose=FALSE),
 #'                output_options=list(align_output=FALSE,return_fn=TRUE))
 #'
-#' NOTE: both models fit with small optim_options$K_max=40 for demonstration
+#' #NOTE: both models fit with small optim_options$K_max=40 for demonstration
 #'
 #' @export
 fase <- function(A,d,self_loops=TRUE,
