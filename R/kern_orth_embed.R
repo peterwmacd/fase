@@ -24,9 +24,7 @@ kern_orth_embed <- function(A,d,
       B_mat <- B_func(init_q,
                       spline_design$x_min,
                       spline_design$x_max)(spline_design$x_vec)
-      xq_vec <- seq(spline_design$x_min,
-                    spline_design$x_max,
-                    length.out=init_q)
+      xq_vec <- spline_design$x_vec[apply(B_mat,2,which.max)]
     }
     Bq_mat <- B_func(init_q,
                      spline_design$x_min,

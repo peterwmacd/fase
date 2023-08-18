@@ -119,6 +119,11 @@
 #'     \item{verbose}{A Boolean, if \code{TRUE}, console output will provide
 #'     updates on the progress of gradient descent. Defaults to
 #'     \code{FALSE}.}
+#'     \item{init_W}{A 3-dimensional array
+#'     containing initial basis coordinates for gradient descent. Dimension should be
+#'     \eqn{n \times}\code{spline_design$q}\eqn{ \times d} for \eqn{B}-spline designs,
+#'     and \eqn{n \times m \times d} for smoothing spline designs. If included,
+#'     \code{init_band} and \code{init_q} are ignored.}
 #'     \item{init_band}{A positive scalar, the bandwidth for local averaging in
 #'     the initialization algorithm. Defaults to
 #'     \code{spline_design$q/(m*(spline_design$x_max - spline_design$x_min))}
@@ -275,7 +280,7 @@ fase <- function(A,d,self_loops=TRUE,
                                                           intercept=TRUE,
                                                           knots=spline_design$x_vec[2:(m-1)],
                                                           Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
-      # ridge matrix
+      # ridge matrix (see utils.R)
       if(lambda > 0){
         spline_design$ridge_mat <- ss_ridge(spline_design)
       }
@@ -298,36 +303,53 @@ fase <- function(A,d,self_loops=TRUE,
   if(is.null(optim_options$verbose)){
     optim_options$verbose <- FALSE
   }
-  if(is.null(optim_options$init_band)){
+  # initialization parameters
+  if(is.null(optim_options$init_W)){
+    if(is.null(optim_options$init_band)){
+      if(spline_design$type=='bs'){
+        optim_options$init_band <- spline_design$q/(m*(spline_design$x_max - spline_design$x_min))
+      }
+      else{
+        optim_options$init_band <- 10/(m*(spline_design$x_max - spline_design$x_min))
+      }
+    }
+    if(is.null(optim_options$init_q)){
+      if(spline_design$type=='bs'){
+        optim_options$init_q <- spline_design$q
+      }
+      else{
+        optim_options$init_q <- 10
+      }
+    }
+    # consistency of parameters
+    if(optim_options$init_q > m){
+      stop('invalid choice of initial q (too large)')
+    }
     if(spline_design$type=='bs'){
-      optim_options$init_band <- spline_design$q/(m*(spline_design$x_max - spline_design$x_min))
-    }
-    else{
-      optim_options$init_band <- 10/(m*(spline_design$x_max - spline_design$x_min))
-    }
-  }
-  if(is.null(optim_options$init_q)){
-    if(spline_design$type=='bs'){
-      optim_options$init_q <- spline_design$q
-    }
-    else{
-      optim_options$init_q <- 10
+      if(optim_options$init_q < 4){
+        stop('invalid choice of initial q (too small)')
+      }
     }
   }
-  # consistency of parameters
-  if(optim_options$init_q > m){
-    stop('invalid choice of initial q (too large)')
-  }
-  if(spline_design$type=='bs'){
-    if((optim_options$init_q < spline_design$q) || (optim_options$init_q < 4)){
-      stop('invalid choice of initial q (too small)')
+  else{
+    # check dimensions
+    if(dim(optim_options$init_W)[1] != n){
+      stop('invalid dimensions of initial coordinates (number of nodes)')
+    }
+    if(dim(optim_options$init_W)[2] != ncol(spline_design$spline_mat)){
+      stop('invalid dimensions of initial coordinates (basis dimension)')
     }
   }
   # initialization
-  W_init <- kern_orth_embed(A,d,
-                            spline_design,
-                            init_q=optim_options$init_q,
-                            band=optim_options$init_band)
+  if(is.null(optim_options$init_W)){
+    W_init <- kern_orth_embed(A,d,
+                              spline_design,
+                              init_q=optim_options$init_q,
+                              band=optim_options$init_band)
+  }
+  else{
+    W_init <- optim_options$init_W
+  }
   # gradient descent
   if(lambda==0){
     gd_out <- gd_fit(A,self_loops,
