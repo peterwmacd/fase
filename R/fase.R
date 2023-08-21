@@ -105,7 +105,7 @@
 #'     basis evaluated at the snapshot indices.}
 #' }
 #' @param lambda A positive scalar, the scale factor for the generalized ridge
-#' penalty (see Details).
+#' penalty (see Details). Defaults to \code{0}.
 #' @param optim_options A list, containing additional optional arguments controlling
 #' the gradient descent algorithm.
 #' \describe{
