@@ -51,7 +51,7 @@ objgrad_ridge <- function(W,G,lambda){
   # objective
   obj <- lambda*sum(wg2[1,,])
   # gradient
-  grad <- 2*lambda*aperm(wg2[-1,,],c(2,1,3))
+  grad <- 2*lambda*aperm(wg2[-1,,,drop=FALSE],c(2,1,3))
   return(list(obj=obj,grad=grad))
 }
 
