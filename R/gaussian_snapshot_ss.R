@@ -4,7 +4,8 @@
 # given dimensions and snapshot times
 process_nonpar <- function(n,d,x_vec,
                            amplitude,
-                           frequency){
+                           frequency,
+                           int_sd){
   # dimensions
   m <- length(x_vec)
   x_min <- min(x_vec)
@@ -12,13 +13,13 @@ process_nonpar <- function(n,d,x_vec,
   # scaled trig functions:
   # fixed parameters
   # minimum amplitude, intercept sd
-  amp_min <- int_sd <- .5
+  amp_min <- .5
   # populate snapshots
   out <- array(NA,c(n,d,m))
   for(ii in 1:n){
     for(rr in 1:d){
       # intercept
-      G <- stats::rnorm(1,sd=int_sd)
+      G <- stats::rnorm(1,sd=int_sd[rr])
       # increase/decrease amplitude
       B <- stats::rbinom(1,1,.5)
       # sin x-intercepts
@@ -40,10 +41,10 @@ process_nonpar <- function(n,d,x_vec,
 #' with Gaussian edges, according to an inner product latent process model.
 #' The latent processes are randomly generated sinusoidal functions.
 #'
-#' The each component of the latent process for node \eqn{i} is given independently by
+#' The the latent process for node \eqn{i} in latent dimension \eqn{r} is given independently by
 #' \deqn{z_{i,r}(x) = \frac{a \sin [2f\pi(x - U) / (x_{max} - x_{min})]}{1 + (2a-1)[x + B(x_{max} - 2x)]} + G}
 #' Where \eqn{G} is Gaussian with mean \code{0} and standard deviation
-#' \code{1/2}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
+#' \eqn{\sigma_{int,r}}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
 #' with minimum \code{spline_design$x_min} and maximum \code{spline_design$x_max}.
 #' \eqn{f} is a frequency parameter specified with
 #' \code{process_options$frequency}, and \eqn{a} is a maximum amplitude parameter
@@ -66,7 +67,8 @@ process_nonpar <- function(n,d,x_vec,
 #' fit a FASE embedding to this data with a natural cubic spline.
 #'
 #' @usage
-#' gaussian_snapshot_ss(n,d,m,x_vec,self_loops,sigma_edge,process_options)
+#' gaussian_snapshot_ss(n,d,m,x_vec,self_loops=TRUE,
+#'                      sigma_edge=1,process_options)
 #'
 #' @param n A positive integer, the number of nodes.
 #' @param d A positive integer, the number of latent space dimensions.
@@ -87,6 +89,11 @@ process_nonpar <- function(n,d,x_vec,
 #'     randomly generated latent processes. Defaults to \code{3}.}
 #'     \item{frequency}{A positive scalar, frequency of the randomly
 #'     generated latent processes. Defaults to \code{2}.}
+#'     \item{sigma_int}{A positive scalar, or a vector of length \eqn{d}.
+#'     If it is a vector, the entries correspond to the standard deviation
+#'     of the random intercepts of the node processes for each latent dimension.
+#'     If is is a scalar, it corresponds to the standard deviation of the
+#'     random intercepts in all dimensions. Defaults to \code{0.5}.}
 #'     \item{return_fn}{A Boolean, if \code{TRUE}, then the latent processes
 #'     are returned as a function which
 #'     takes a vector of indices and returns the corresponding evaluations of
@@ -149,13 +156,27 @@ gaussian_snapshot_ss <- function(n,d,
   if(is.null(process_options$frequency)){
     process_options$frequency <- 2
   }
+  if(is.null(process_options$sigma_int)){
+    process_options$sigma_int <- rep(0.5,d)
+  }
+  else{
+    if(length(process_options$sigma_int)==1){
+      process_options$sigma_int <- rep(process_options$sigma_int,d)
+    }
+    else{
+      if(length(process_options$sigma_int) != d){
+        stop('invalid dimension of intercept standard deviations, must be 1 or d')
+      }
+    }
+  }
   if(is.null(process_options$return_fn)){
     process_options$return_fn <- FALSE
   }
   # Z populate
   Z_array <- process_nonpar(n,d,x_vec,
                             process_options$amplitude,
-                            process_options$frequency)
+                            process_options$frequency,
+                            process_options$sigma_int)
   # start with mean structure
   A <- Z_to_Theta(Z_array,self_loops)
   for(kk in 1:m){

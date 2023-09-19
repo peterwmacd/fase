@@ -22,7 +22,9 @@
 #' for \eqn{i \leq j} (or \eqn{i < j} with no self loops).
 #'
 #' @usage
-#' gaussian_snapshot_bs(n,d,m,self_loops,spline_design,sigma_edge,process_options)
+#' gaussian_snapshot_bs(n,d,m,self_loops=TRUE,
+#'                      spline_design,sigma_edge=1,
+#'                      process_options)
 #'
 #' @param n A positive integer, the number of nodes.
 #' @param d A positive integer, the number of latent space dimensions.
@@ -48,8 +50,11 @@
 #' Defaults to \code{1}.
 #' @param process_options A list, containing additional optional arguments:
 #' \describe{
-#'     \item{sigma_coord}{A positive scalar, the standard deviation of the
-#'     randomly generated basis coordinates. Defaults to \code{1}.}
+#'     \item{sigma_coord}{A positive scalar, or a vector of length \eqn{d}.
+#'     If it is a vector, the entries correspond to the standard deviation
+#'     of the randomly generated basis coordinates for each latent dimension.
+#'     If is is a scalar, it corresponds to the standard deviation of the
+#'     basis coordinates in all dimensions. Defaults to \code{1}.}
 #' }
 #'
 #'
@@ -126,10 +131,20 @@ gaussian_snapshot_bs <- function(n,d,
                                      spline_design$x_max)(spline_design$x_vec)
   # process options checking
   if(is.null(process_options$sigma_coord)){
-    process_options$sigma_coord <- 1
+    process_options$sigma_coord <- rep(1,d)
+  }
+  else{
+    if(length(process_options$sigma_coord)==1){
+      process_options$sigma_coord <- rep(process_options$sigma_coord,d)
+    }
+    else{
+      if(length(process_options$sigma_coord) != d){
+        stop('invalid dimension of coordinate standard deviations, must be 1 or d')
+      }
+    }
   }
   # populate Theta, A
-  W <- array(stats::rnorm(n*spline_design$q*d,sd=process_options$sigma_coord),c(n,spline_design$q,d))
+  W <- aperm(array(stats::rnorm(d*n*spline_design$q,sd=process_options$sigma_coord),c(d,n,spline_design$q)),c(2,3,1))
   # start with mean structure
   A <- WB_to_Theta(W,spline_design$spline_mat,self_loops)
   for(kk in 1:m){

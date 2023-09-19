@@ -4,7 +4,9 @@
 \alias{gaussian_snapshot_bs}
 \title{Simulate Gaussian edge networks with B-spline latent processes}
 \usage{
-gaussian_snapshot_bs(n,d,m,self_loops,spline_design,sigma_edge,process_options)
+gaussian_snapshot_bs(n,d,m,self_loops=TRUE,
+                     spline_design,sigma_edge=1,
+                     process_options)
 }
 \arguments{
 \item{n}{A positive integer, the number of nodes.}
@@ -37,8 +39,11 @@ Defaults to \code{1}.}
 
 \item{process_options}{A list, containing additional optional arguments:
 \describe{
-\item{sigma_coord}{A positive scalar, the standard deviation of the
-randomly generated basis coordinates. Defaults to \code{1}.}
+\item{sigma_coord}{A positive scalar, or a vector of length \eqn{d}.
+If it is a vector, the entries correspond to the standard deviation
+of the randomly generated basis coordinates for each latent dimension.
+If is is a scalar, it corresponds to the standard deviation of the
+basis coordinates in all dimensions. Defaults to \code{1}.}
 }}
 }
 \value{

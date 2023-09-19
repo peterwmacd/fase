@@ -4,7 +4,8 @@
 \alias{gaussian_snapshot_ss}
 \title{Simulate Gaussian edge networks with nonparametric latent processes}
 \usage{
-gaussian_snapshot_ss(n,d,m,x_vec,self_loops,sigma_edge,process_options)
+gaussian_snapshot_ss(n,d,m,x_vec,self_loops=TRUE,
+                     sigma_edge=1,process_options)
 }
 \arguments{
 \item{n}{A positive integer, the number of nodes.}
@@ -32,6 +33,11 @@ Defaults to \code{1}.}
 randomly generated latent processes. Defaults to \code{3}.}
 \item{frequency}{A positive scalar, frequency of the randomly
 generated latent processes. Defaults to \code{2}.}
+\item{sigma_int}{A positive scalar, or a vector of length \eqn{d}.
+If it is a vector, the entries correspond to the standard deviation
+of the random intercepts of the node processes for each latent dimension.
+If is is a scalar, it corresponds to the standard deviation of the
+random intercepts in all dimensions. Defaults to \code{0.5}.}
 \item{return_fn}{A Boolean, if \code{TRUE}, then the latent processes
 are returned as a function which
 takes a vector of indices and returns the corresponding evaluations of
@@ -62,10 +68,10 @@ with Gaussian edges, according to an inner product latent process model.
 The latent processes are randomly generated sinusoidal functions.
 }
 \details{
-The each component of the latent process for node \eqn{i} is given independently by
+The the latent process for node \eqn{i} in latent dimension \eqn{r} is given independently by
 \deqn{z_{i,r}(x) = \frac{a \sin [2f\pi(x - U) / (x_{max} - x_{min})]}{1 + (2a-1)[x + B(x_{max} - 2x)]} + G}
 Where \eqn{G} is Gaussian with mean \code{0} and standard deviation
-\code{1/2}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
+\eqn{\sigma_{int,r}}, \eqn{B} is Bernoulli with mean \code{1/2}, and \eqn{U} is uniform
 with minimum \code{spline_design$x_min} and maximum \code{spline_design$x_max}.
 \eqn{f} is a frequency parameter specified with
 \code{process_options$frequency}, and \eqn{a} is a maximum amplitude parameter

@@ -6,8 +6,8 @@ coord_rdpg <- function(n,q,d,
   for(ii in 1:n){
     # generate Dirichlet variables
     # matrix of independent chi-square ( == gamma(alpha,2) ) rvs
-    vv <- matrix(stats::rchisq(q*d,2*alpha),nrow=q)
-    # rescale rows to d-dimensional simplex
+    vv <- t(matrix(stats::rchisq(d*q,2*alpha),nrow=d))
+    # rescale rows to the d-dimensional simplex
     temp <- vv / rowSums(vv)
     normalizer <- max(sqrt(rowSums((B_mat %*% temp)^2)))
     if(normalizer > 1){
@@ -36,7 +36,9 @@ coord_rdpg <- function(n,q,d,
 #' The (\eqn{q \times d}) latent process basis coordinates \eqn{W_i}
 #' for each node are generated as \eqn{q} iid Dirichlet
 #' random variables with \eqn{d}-dimensional parameter
-#' \code{rep(1,d)/process_options$alpha_coord}.
+#' \code{process_options$alpha_coord} or
+#' \code{rep(process_options$alpha_coord,d)} depending on the dimension
+#' of \code{process_options$alpha_coord}.
 #' Roughly, smaller values of \code{process_options$alpha_coord} will
 #' tend to generate latent positions closer to the corners of the simplex.
 #'
@@ -56,7 +58,8 @@ coord_rdpg <- function(n,q,d,
 #'
 #'
 #' @usage
-#' rdpg_snapshot_bs(n,d,m,self_loops,spline_design,process_options)
+#' rdpg_snapshot_bs(n,d,m,self_loops=TRUE,
+#'                  spline_design,process_options)
 #'
 #' @param n A positive integer, the number of nodes.
 #' @param d A positive integer, the number of latent space dimensions.
@@ -79,8 +82,11 @@ coord_rdpg <- function(n,q,d,
 #' }
 #' @param process_options A list, containing additional optional arguments:
 #' \describe{
-#'     \item{alpha_coord}{A positive scalar, which scales the Dirichlet
-#'     parameter of the basis coordinates. Defaults to \code{.1}.}
+#'     \item{alpha_coord}{A positive scalar, or a vector of length \eqn{d}.
+#'     If it is a vector, it corresponds to the Dirichlet parameter of the
+#'     basis coordinates.
+#'     If is is a scalar, the basis coordinates have Dirichlet parameter
+#'     \code{rep(alpha_coord,d)}. Defaults to \code{0.1}.}
 #'     \item{density}{A scalar between \code{0} and {1}, which controls the
 #'     approximate overall edge density of the resulting multiplex matrix.
 #'     Defaults to \code{1/d}. If specified larger than \code{1/d}, this
@@ -164,6 +170,19 @@ rdpg_snapshot_bs <- function(n,d,
   # process options checking
   if(is.null(process_options$alpha_coord)){
     process_options$alpha_coord <- .1
+  }
+  if(is.null(process_options$alpha_coord)){
+    process_options$sigma_int <- rep(.1,d)
+  }
+  else{
+    if(length(process_options$alpha_coord)==1){
+      process_options$alpha_coord <- rep(process_options$alpha_coord,d)
+    }
+    else{
+      if(length(process_options$alpha_coord) != d){
+        stop('invalid dimension of intercept standard deviations, must be 1 or d')
+      }
+    }
   }
   if(is.null(process_options$density)){
     process_options$density <- 1/d
