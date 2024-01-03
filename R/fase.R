@@ -201,7 +201,7 @@
 #' # fase fit with B-spline design
 #' fit_bs <- fase(data$A,d=2,self_loops=FALSE,
 #'                spline_design=list(type='bs',q=9,x_vec=data$spline_design$x_vec),
-#'                optim_options=list(eps=1e-4,K_max=40,init_q=12),
+#'                optim_options=list(eps=1e-4,K_max=40),
 #'                output_options=list(return_coords=TRUE))
 #'
 #' # fase fit with smoothing spline design

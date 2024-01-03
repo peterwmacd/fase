@@ -139,9 +139,9 @@ ridge penalty. Only returned for \code{lambda > 0}.}
 \code{output_options$return_ngcv} is \code{TRUE}.}
 \item{K}{A positive integer, the number of iterations run in
 gradient descent.}
-\item{converged}{An integer convergence code, \code{0} if
+\item{converged}{An integer convergence code, \code{1} if
 gradient descent converged in fewer than \code{optim_options$K_max} iterations,
-\code{1} otherwise.}
+\code{0} otherwise.}
 }
 \description{
 \code{fase_seq} fits a functional adjacency spectral embedding to snapshots
@@ -218,7 +218,7 @@ data <- gaussian_snapshot_ss(n=50,d=2,
 # fase fit with B-spline design
 fit_bs <- fase_seq(data$A,d=2,self_loops=FALSE,
                    spline_design=list(type='bs',q=9,x_vec=data$spline_design$x_vec),
-                   optim_options=list(eps=1e-4,K_max=40,init_q=12),
+                   optim_options=list(eps=1e-4,K_max=40),
                    output_options=list(return_coords=TRUE))
 
 # fase fit with smoothing spline design
