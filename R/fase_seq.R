@@ -190,9 +190,9 @@
 #' \code{output_options$return_ngcv} is \code{TRUE}.}
 #' \item{K}{A positive integer, the number of iterations run in
 #' gradient descent.}
-#' \item{converged}{An integer convergence code, \code{0} if
+#' \item{converged}{An integer convergence code, \code{1} if
 #' gradient descent converged in fewer than \code{optim_options$K_max} iterations,
-#' \code{1} otherwise.}
+#' \code{0} otherwise.}
 #'
 #' @examples
 #' # Gaussian edge data with sinusoidal latent processes
@@ -308,32 +308,29 @@ fase_seq <- function(A,d,self_loops=TRUE,
     optim_options$verbose <- FALSE
   }
   # initialization parameters
+  init_sigma <- NULL
   if(is.null(optim_options$init_W)){
     if(is.null(optim_options$init_band)){
-      if(spline_design$type=='bs'){
-        optim_options$init_band <- spline_design$q/(m*(spline_design$x_max - spline_design$x_min))
+      if(is.null(init_sigma)){
+        init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      else{
-        optim_options$init_band <- 10/(m*(spline_design$x_max - spline_design$x_min))
-      }
+      optim_options$init_band <- floor(((init_sigma^2)*(m^2) / n)^(1/3))
     }
     if(is.null(optim_options$init_q)){
-      if(spline_design$type=='bs'){
-        optim_options$init_q <- spline_design$q
+      if(is.null(init_sigma)){
+        init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      else{
-        optim_options$init_q <- 10
-      }
+      optim_options$init_q <- floor(2*(n*m / (init_sigma^2))^(1/6))
     }
     # consistency of parameters
     if(optim_options$init_q > m){
       stop('invalid choice of initial q (too large)')
     }
-    if(spline_design$type=='bs'){
-      if(optim_options$init_q < 4){
-        stop('invalid choice of initial q (too small)')
-      }
-    }
+    # if(spline_design$type=='bs'){
+    #   if(optim_options$init_q < 4){
+    #     stop('invalid choice of initial q (too small)')
+    #   }
+    # }
     init_given <- FALSE
   }
   else{

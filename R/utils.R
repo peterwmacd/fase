@@ -281,3 +281,39 @@ coord_to_func <- function(W,spline_design){
   return(Z)
 }
 
+# helper for subsetting the middle elements of a vector
+midM <- function(v,M){
+  L <- length(v)
+  diff <- L - M
+  if((diff %% 2)==0){
+    d1 <- 1:(diff/2)
+    d2 <- (L-(diff/2)+1):L
+  }
+  else{
+    d1 <- 1:floor(diff/2)
+    d2 <- (L-floor(diff/2)):L
+  }
+  return(v[-c(d1,d2)])
+}
+
+# robust noise estimation for a low-rank matrix with the MAD estimator
+# of Gavish and Donoho
+# This is a simpler adaptation of the function denoiseR::estim_sigma
+# as that package has non-trivial dependencies, and
+# its maintenance status is unclear
+estim_sigma_mad <- function(M){
+  # center columns
+  Mc <- scale(M, scale = F)
+  # dimensions
+  n = nrow(Mc)
+  p = ncol(Mc)
+  # auxiliary quantities
+  beta <- min(n, p)/max(n, p)
+  lambdastar <- sqrt(2 * (beta + 1) + 8 * beta/((beta +
+                                                   1 + (sqrt(beta^2 + 14 * beta + 1)))))
+  wbstar <- 0.56 * beta^3 - 0.95 * beta^2 + 1.82 * beta +
+    1.43
+  # sigma estimate
+  sigma <- stats::median(svd(Mc)$d)/(sqrt(max(n, p)) * (lambdastar/wbstar))
+  return(sigma)
+}
