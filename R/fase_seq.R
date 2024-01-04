@@ -308,29 +308,23 @@ fase_seq <- function(A,d,self_loops=TRUE,
     optim_options$verbose <- FALSE
   }
   # initialization parameters
-  init_sigma <- NULL
   if(is.null(optim_options$init_W)){
     if(is.null(optim_options$init_band)){
-      if(is.null(init_sigma)){
-        init_sigma <- mean(apply(A,3,estim_sigma_mad))
+      if(is.null(optim_options$init_sigma)){
+        optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_band <- floor(((init_sigma^2)*(m^2) / n)^(1/3))
+      optim_options$init_band <- floor(((optim_options$init_sigma^2)*(m^2) / n)^(1/3))
     }
     if(is.null(optim_options$init_q)){
-      if(is.null(init_sigma)){
-        init_sigma <- mean(apply(A,3,estim_sigma_mad))
+      if(is.null(optim_options$init_sigma)){
+        optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_q <- floor(2*(n*m / (init_sigma^2))^(1/6))
+      optim_options$init_q <- floor(2*(n*m / (optim_options$init_sigma^2))^(1/6))
     }
     # consistency of parameters
     if(optim_options$init_q > m){
       stop('invalid choice of initial q (too large)')
     }
-    # if(spline_design$type=='bs'){
-    #   if(optim_options$init_q < 4){
-    #     stop('invalid choice of initial q (too small)')
-    #   }
-    # }
     init_given <- FALSE
   }
   else{
