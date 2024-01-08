@@ -37,7 +37,7 @@ Z_to_Theta <- function(Z,self_loops){
 }
 
 # cubic B-spline evaluation function
-B_func <- function(q,x_min,x_max){
+B_func <- function(q,x_min,x_max,x_vec=NULL){
   # calculate evenly spaced knots
   nknots <- q-4
   if(nknots < 0){
@@ -47,7 +47,14 @@ B_func <- function(q,x_min,x_max){
     knot_seq <- NULL
   }
   if(nknots > 0){
-    knot_seq <- seq(from=x_min,to=x_max,length.out=nknots+2)[-c(1,(nknots+2))]
+    if(is.null(x_vec)){
+      # pass x_vec=NULL for evenly spaced knots
+      knot_seq <- seq(from=x_min,to=x_max,length.out=nknots+2)[-c(1,(nknots+2))]
+    }
+    else{
+      # alternative with quantiles of x_vec
+      knot_seq <- x_vec[floor(seq(from=1,to=length(x_vec),length.out=nknots+2))[-c(1,(nknots+2))]]
+    }
   }
   B <- function(x){
     in_int <- (x >= x_min & x <= x_max)
@@ -264,7 +271,8 @@ coord_to_func <- function(W,spline_design){
     if(spline_design$type=='bs'){
       spline_mat_temp <- B_func(spline_design$q,
                                 spline_design$x_min,
-                                spline_design$x_max)(x[x_sub])
+                                spline_design$x_max,
+                                spline_design$x_vec)(x[x_sub])
     }
     # S-spline new design matrix
     else{

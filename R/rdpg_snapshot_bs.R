@@ -166,7 +166,8 @@ rdpg_snapshot_bs <- function(n,d,
   # B-spline design
   spline_design$spline_mat <- B_func(spline_design$q,
                                      spline_design$x_min,
-                                     spline_design$x_max)(spline_design$x_vec)
+                                     spline_design$x_max,
+                                     spline_design$x_vec)(spline_design$x_vec)
   # process options checking
   if(is.null(process_options$alpha_coord)){
     process_options$alpha_coord <- .1

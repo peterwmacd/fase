@@ -254,9 +254,12 @@ fase_seq <- function(A,d,self_loops=TRUE,
     }
     # populate
     # B-spline design
-    spline_design$spline_mat <- B_func(spline_design$q,
-                                       spline_design$x_min,
-                                       spline_design$x_max)(spline_design$x_vec)
+    if(is.null(spline_design$spline_mat)){
+      spline_design$spline_mat <- B_func(spline_design$q,
+                                         spline_design$x_min,
+                                         spline_design$x_max,
+                                         spline_design$x_vec)(spline_design$x_vec)
+    }
     # ridge matrix
     if(lambda > 0){
       spline_design$ridge_mat <- diag(m)
@@ -280,10 +283,12 @@ fase_seq <- function(A,d,self_loops=TRUE,
       }
       # populating
       # S-spline design
-      spline_design$spline_mat <- splines2::naturalSpline(spline_design$x_vec,
-                                                          intercept=TRUE,
-                                                          knots=spline_design$x_vec[2:(m-1)],
-                                                          Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
+      if(is.null(spline_design$spline_mat)){
+        spline_design$spline_mat <- splines2::naturalSpline(spline_design$x_vec,
+                                                            intercept=TRUE,
+                                                            knots=spline_design$x_vec[2:(m-1)],
+                                                            Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
+      }
       # ridge matrix (see utils.R)
       if(lambda > 0){
         spline_design$ridge_mat <- ss_ridge(spline_design)

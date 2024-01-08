@@ -250,9 +250,12 @@ fase <- function(A,d,self_loops=TRUE,
     }
     # populate
     # B-spline design
-    spline_design$spline_mat <- B_func(spline_design$q,
-                                       spline_design$x_min,
-                                       spline_design$x_max)(spline_design$x_vec)
+    if(is.null(spline_design$spline_mat)){
+      spline_design$spline_mat <- B_func(spline_design$q,
+                                         spline_design$x_min,
+                                         spline_design$x_max,
+                                         spline_design$x_vec)(spline_design$x_vec)
+    }
     # ridge matrix
     if(lambda > 0){
       spline_design$ridge_mat <- diag(m)
@@ -276,10 +279,12 @@ fase <- function(A,d,self_loops=TRUE,
       }
       # populating
       # S-spline design
-      spline_design$spline_mat <- splines2::naturalSpline(spline_design$x_vec,
-                                                          intercept=TRUE,
-                                                          knots=spline_design$x_vec[2:(m-1)],
-                                                          Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
+      if(is.null(spline_design$spline_mat)){
+        spline_design$spline_mat <- splines2::naturalSpline(spline_design$x_vec,
+                                                            intercept=TRUE,
+                                                            knots=spline_design$x_vec[2:(m-1)],
+                                                            Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
+      }
       # ridge matrix (see utils.R)
       if(lambda > 0){
         spline_design$ridge_mat <- ss_ridge(spline_design)
@@ -334,9 +339,9 @@ fase <- function(A,d,self_loops=TRUE,
   # initialization
   if(is.null(optim_options$init_W)){
     W_init <- local_orth_embed(A,d,
-                              spline_design,
-                              init_q=optim_options$init_q,
-                              band=optim_options$init_band)
+                               spline_design,
+                               init_q=optim_options$init_q,
+                               band=optim_options$init_band)
   }
   else{
     W_init <- optim_options$init_W
