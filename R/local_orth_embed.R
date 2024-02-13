@@ -3,16 +3,16 @@
 # local average spectral embedding for initialization
 local_orth_embed <- function(A,d,
                             spline_design,
-                            init_q,band){
+                            L,M){
   # design/dimensions
   n <- dim(A)[1]
   m <- length(spline_design$x_vec)
   # partition indices
-  groups <- ceiling(init_q*1:m / m)
+  groups <- ceiling(L*1:m / m)
   # dictionary of local embeddings
-  Z_tilde <- array(0,c(n,d,init_q))
-  for(ll in 1:init_q){
-    iloc <- midM(which(groups==ll),band)
+  Z_tilde <- array(0,c(n,d,L))
+  for(ll in 1:L){
+    iloc <- midM(which(groups==ll),M)
     temp <- ase(apply(A[,,iloc],c(1,2),mean),d,positive=TRUE)
     if(ll > 1){
       if(is.matrix(temp)){

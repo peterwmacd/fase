@@ -48,10 +48,6 @@
 #' evaluated at the snapshot indices as an \eqn{n \times d \times m} array, after
 #' performing a Procrustes alignment of the consecutive snapshots.
 #' This extra alignment step can be skipped.
-#' \code{output_options$return_fn} provides an option to return
-#' the latent processes as a function which
-#' takes a vector of indices and returns the corresponding evaluations of
-#' the latent process matrices.
 #' \code{fase_seq} will also return the spline design information used to fit the
 #' embedding, convergence information for gradient descent, and (if specified)
 #' the basis coordinates.
@@ -127,17 +123,14 @@
 #'     containing initial basis coordinates for gradient descent. Dimension should be
 #'     \eqn{n \times}\code{spline_design$q}\eqn{ \times d} for \eqn{B}-spline designs,
 #'     and \eqn{n \times m \times d} for smoothing spline designs. If included,
-#'     \code{init_band} and \code{init_q} are ignored.}
-#'     \item{init_band}{A positive scalar, the bandwidth for local averaging in
-#'     the initialization algorithm. Defaults to
-#'     \code{spline_design$q/(m*(spline_design$x_max - spline_design$x_min))}
-#'     for \eqn{B}-spline designs
-#'     and \code{10/(m*(spline_design$x_max - spline_design$x_min))}
-#'     for smoothing spline designs.}
-#'     \item{init_q}{A positive integer, the size of the reduced grid of embedding
-#'     indices used in the initialization algorithm. Defaults to \code{spline_design$q}
-#'     for \eqn{B}-spline designs
-#'     and \code{10} for smoothing spline designs.}
+#'     \code{init_M}, \code{init_L} and \code{init_sigma} are ignored.}
+#'     \item{init_sigma}{A positive scalar, the estimated edge dispersion parameter to calibrate
+#'     initialization. If not provided, it is estimated using the robust method proposed by
+#'     Gavish and Donoho (2014).}
+#'     \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
+#'     Defaults to the floor of \eqn{2(nm/\sigma^2)^{1/6}}.}
+#'     \item{init_M}{A positive integer, the number of snapshots averaged in each group for
+#'     initialization. Defaults to the floor of \eqn{(\sigma^2m^2/n)^{1/3}}.}
 #' }
 #' @param output_options A list, containing additional optional arguments controlling
 #' the output of \code{fase}.
@@ -146,11 +139,6 @@
 #'     have been aligned according to a Procrustes alignment which minimizes
 #'     (in terms of Frobenius norm) the overall discrepancies between consecutive
 #'     snapshots. Defaults to \code{TRUE}.}
-#'     \item{return_fn}{A Boolean, if \code{TRUE}, the latent processes are
-#'     returned as a function which
-#'     takes a vector of indices and returns the corresponding evaluations of
-#'     the latent process matrices. Otherwise, the latent processes are returned as
-#'     an \eqn{n \times d \times m} array. Defaults to \code{FALSE}.}
 #'     \item{return_coords}{A Boolean, if \code{TRUE}, the basis coordinates for
 #'     each latent process component are also returned as an array.
 #'     Defaults to \code{FALSE}.}
@@ -162,10 +150,8 @@
 #' @return A list is returned with the functional adjacency spectral embedding,
 #' the spline design information, and some additional optimization
 #' output:
-#' \item{Z}{Either an \eqn{n \times d \times m} array containing the latent process embedding
-#' evaluated at the indices in \code{spline_design$x_vec}, or a function which
-#' takes a vector of indices and returns the corresponding evaluations of
-#' the latent process matrices, depending on \code{output_options$return_fn}.}
+#' \item{Z}{An \eqn{n \times d \times m} array containing the latent process embedding
+#' evaluated at the indices in \code{spline_design$x_vec}.}
 #' \item{W}{For \eqn{B}-spline designs, an \eqn{n \times q \times d} array; or for
 #' smoothing spline designs, an \eqn{n \times m \times d} array of estimated basis
 #' coordinates. If \code{output_options$return_coords} is \code{FALSE},
@@ -213,7 +199,7 @@
 #'                    spline_design=list(type='ss',x_vec=data$spline_design$x_vec),
 #'                    lambda=.5,
 #'                    optim_options=list(eta=1e-4,K_max=40,verbose=FALSE),
-#'                    output_options=list(align_output=FALSE,return_fn=TRUE))
+#'                    output_options=list(align_output=FALSE))
 #'
 #' #NOTE: both models fit with small optim_options$K_max=40 for demonstration
 #'
@@ -314,20 +300,20 @@ fase_seq <- function(A,d,self_loops=TRUE,
   }
   # initialization parameters
   if(is.null(optim_options$init_W)){
-    if(is.null(optim_options$init_band)){
+    if(is.null(optim_options$init_M)){
       if(is.null(optim_options$init_sigma)){
         optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_band <- floor(((optim_options$init_sigma^2)*(m^2) / n)^(1/3))
+      optim_options$init_M <- floor(((optim_options$init_sigma^2)*(m^2) / n)^(1/3))
     }
-    if(is.null(optim_options$init_q)){
+    if(is.null(optim_options$init_L)){
       if(is.null(optim_options$init_sigma)){
         optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_q <- floor(2*(n*m / (optim_options$init_sigma^2))^(1/6))
+      optim_options$init_L <- floor(2*(n*m / (optim_options$init_sigma^2))^(1/6))
     }
     # consistency of parameters
-    if(optim_options$init_q > m){
+    if(optim_options$init_L > m){
       stop('invalid choice of initial q (too large)')
     }
     init_given <- FALSE
@@ -348,19 +334,6 @@ fase_seq <- function(A,d,self_loops=TRUE,
   # output parameter checking
   if(is.null(output_options$align_output)){
     output_options$align_output <- TRUE
-  }
-  if(is.null(output_options$return_fn)){
-    output_options$return_fn <- FALSE
-    final_fn <- FALSE
-  }
-  else{
-    if(output_options$return_fn){
-      final_fn <- TRUE
-      output_options$return_fn <- FALSE #don't want internal functional output
-    }
-    else{
-      final_fn <- FALSE
-    }
   }
   if(is.null(output_options$return_coords)){
     output_options$return_coords <- TRUE
@@ -420,12 +393,7 @@ fase_seq <- function(A,d,self_loops=TRUE,
   }
   # estimated processes
   # process snapshots
-  if(final_fn){
-    out$Z <- coord_to_func(W_seq,spline_design)
-  }
-  else{
-    out$Z <- Z_seq
-  }
+  out$Z <- Z_seq
   # check if
   if(final_coords){
     out$W <- W_seq

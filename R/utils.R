@@ -304,6 +304,7 @@ midM <- function(v,M){
   return(v[-c(d1,d2)])
 }
 
+# (ported over from multiness package)
 # robust noise estimation for a low-rank matrix with the MAD estimator
 # of Gavish and Donoho
 # This is a simpler adaptation of the function denoiseR::estim_sigma
