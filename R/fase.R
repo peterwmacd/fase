@@ -124,9 +124,9 @@
 #'     initialization. If not provided, it is estimated using the robust method proposed by
 #'     Gavish and Donoho (2014).}
 #'     \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
-#'     Defaults to the floor of \eqn{2(nm/\sigma^2)^{1/6}}.}
+#'     Defaults to the floor of \eqn{(nm/\texttt{init\_sigma}^2)^{1/3}}.}
 #'     \item{init_M}{A positive integer, the number of snapshots averaged in each group for
-#'     initialization. Defaults to the floor of \eqn{(\sigma^2m^2/n)^{1/3}}.}
+#'     initialization. Defaults use all snapshots.}
 #' }
 #' @param output_options A list, containing additional optional arguments controlling
 #' the output of \code{fase}.
@@ -300,13 +300,13 @@ fase <- function(A,d,self_loops=TRUE,
       if(is.null(optim_options$init_sigma)){
         optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_M <- floor(((optim_options$init_sigma^2)*(m^2) / n)^(1/3))
+      optim_options$init_M <- Inf
     }
     if(is.null(optim_options$init_L)){
       if(is.null(optim_options$init_sigma)){
         optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_L <- floor(2*(n*m / (optim_options$init_sigma^2))^(1/6))
+      optim_options$init_L <- floor((n*m / (optim_options$init_sigma^2))^(1/3))
     }
     # consistency of parameters
     if(optim_options$init_L > m){

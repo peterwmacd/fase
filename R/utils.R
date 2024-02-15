@@ -267,22 +267,22 @@ coord_to_func <- function(W,spline_design){
     Z_temp <- array(0,c(dim(W)[1],dim(W)[3],length(x)))
     x_sub <- ((x >= spline_design$x_min) & (x <= spline_design$x_max))
     if(sum(x_sub) > 0){
-    # B-spline new design matrix
-    if(spline_design$type=='bs'){
-      spline_mat_temp <- B_func(spline_design$q,
-                                spline_design$x_min,
-                                spline_design$x_max,
-                                spline_design$x_vec)(x[x_sub])
-    }
-    # S-spline new design matrix
-    else{
-      m <- length(spline_design$x_vec)
-      spline_mat_temp <- splines2::naturalSpline(x[x_sub],
-                                                 intercept=TRUE,
-                                                 knots=spline_design$x_vec[2:(m-1)],
-                                                 Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
-    }
-    Z_temp[,,x_sub] <- coord_to_snap(W,spline_mat_temp)
+      # B-spline new design matrix
+      if(spline_design$type=='bs'){
+        spline_mat_temp <- B_func(spline_design$q,
+                                  spline_design$x_min,
+                                  spline_design$x_max,
+                                  spline_design$x_vec)(x[x_sub])
+      }
+      # S-spline new design matrix
+      else{
+        m <- length(spline_design$x_vec)
+        spline_mat_temp <- splines2::naturalSpline(x[x_sub],
+                                                   intercept=TRUE,
+                                                   knots=spline_design$x_vec[2:(m-1)],
+                                                   Boundary.knots=c(spline_design$x_vec[1],spline_design$x_vec[m]))
+      }
+      Z_temp[,,x_sub] <- coord_to_snap(W,spline_mat_temp)
     }
     return(Z_temp)
   }
@@ -293,15 +293,20 @@ coord_to_func <- function(W,spline_design){
 midM <- function(v,M){
   L <- length(v)
   diff <- L - M
-  if((diff %% 2)==0){
-    d1 <- 1:(diff/2)
-    d2 <- (L-(diff/2)+1):L
+  if(diff <= 0){
+    return(v)
   }
   else{
-    d1 <- 1:floor(diff/2)
-    d2 <- (L-floor(diff/2)):L
+    if((diff %% 2)==0){
+      d1 <- 1:(diff/2)
+      d2 <- (L-(diff/2)+1):L
+    }
+    else{
+      d1 <- 1:floor(diff/2)
+      d2 <- (L-floor(diff/2)):L
+    }
+    return(v[-c(d1,d2)])
   }
-  return(v[-c(d1,d2)])
 }
 
 # (ported over from multiness package)

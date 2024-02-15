@@ -2,7 +2,7 @@
 % Please edit documentation in R/fase_seq.R
 \name{fase_seq}
 \alias{fase_seq}
-\title{Functional adjacency spectral embedding}
+\title{Functional adjacency spectral embedding (sequential algorithm)}
 \usage{
 fase_seq(A,d,self_loops,spline_design,lambda,optim_options,output_options)
 }
@@ -79,9 +79,9 @@ and \eqn{n \times m \times d} for smoothing spline designs. If included,
 initialization. If not provided, it is estimated using the robust method proposed by
 Gavish and Donoho (2014).}
 \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
-Defaults to the floor of \eqn{2(nm/\sigma^2)^{1/6}}.}
+Defaults to the floor of \eqn{(nm/\texttt{init\_sigma}^2)^{1/3}}.}
 \item{init_M}{A positive integer, the number of snapshots averaged in each group for
-initialization. Defaults to the floor of \eqn{(\sigma^2m^2/n)^{1/3}}.}
+initialization. Defaults use all snapshots.}
 }}
 
 \item{output_options}{A list, containing additional optional arguments controlling
