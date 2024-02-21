@@ -128,7 +128,7 @@
 #'     initialization. If not provided, it is estimated using the robust method proposed by
 #'     Gavish and Donoho (2014).}
 #'     \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
-#'     Defaults to the floor of \eqn{(nm/8\texttt{init\_sigma}^2)^{1/3}}.}
+#'     Defaults to the floor of \eqn{(nm/\texttt{init\_sigma}^2)^{1/3}}.}
 #'     \item{init_M}{A positive integer, the number of snapshots averaged in each group for
 #'     initialization. Defaults use all snapshots.}
 #' }
@@ -310,7 +310,7 @@ fase_seq <- function(A,d,self_loops=TRUE,
       if(is.null(optim_options$init_sigma)){
         optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_L <- max(floor((n*m / (8*optim_options$init_sigma^2))^(1/3)),1)
+      optim_options$init_L <- max(floor((n*m / (optim_options$init_sigma^2))^(1/3)),1)
     }
     # consistency of parameters
     if(optim_options$init_L > m){
