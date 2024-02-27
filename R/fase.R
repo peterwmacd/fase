@@ -306,7 +306,7 @@ fase <- function(A,d,self_loops=TRUE,
       if(is.null(optim_options$init_sigma)){
         optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
       }
-      optim_options$init_L <- max(floor((n*m / (optim_options$init_sigma^2))^(1/3)),1)
+      optim_options$init_L <- min(max(floor((n*m / (optim_options$init_sigma^2))^(1/3)),1),m)
     }
     # consistency of parameters
     if(optim_options$init_L > m){
