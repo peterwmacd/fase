@@ -125,8 +125,9 @@
 #'     and \eqn{n \times m \times d} for smoothing spline designs. If included,
 #'     \code{init_M}, \code{init_L} and \code{init_sigma} are ignored.}
 #'     \item{init_sigma}{A positive scalar, the estimated edge dispersion parameter to calibrate
-#'     initialization. If not provided, it is estimated using the robust method proposed by
-#'     Gavish and Donoho (2014).}
+#'     initialization. If not provided, it is either estimated using the robust method proposed by
+#'     Gavish and Donoho (2014) for weighted edge networks, or set to a default value \code{0.5}
+#'     for binary edge networks.}
 #'     \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
 #'     Defaults to the floor of \eqn{(nm/\texttt{init\_sigma}^2)^{1/3}}.}
 #'     \item{init_M}{A positive integer, the number of snapshots averaged in each group for
@@ -135,10 +136,6 @@
 #' @param output_options A list, containing additional optional arguments controlling
 #' the output of \code{fase}.
 #' \describe{
-#'     \item{align_output}{A Boolean, if \code{TRUE}, the returned latent processes
-#'     have been aligned according to a Procrustes alignment which minimizes
-#'     (in terms of Frobenius norm) the overall discrepancies between consecutive
-#'     snapshots. Defaults to \code{TRUE}.}
 #'     \item{return_coords}{A Boolean, if \code{TRUE}, the basis coordinates for
 #'     each latent process component are also returned as an array.
 #'     Defaults to \code{FALSE}.}
@@ -198,8 +195,7 @@
 #' fit_ss <- fase_seq(data$A,d=2,self_loops=FALSE,
 #'                    spline_design=list(type='ss',x_vec=data$spline_design$x_vec),
 #'                    lambda=.5,
-#'                    optim_options=list(eta=1e-4,K_max=40,verbose=FALSE),
-#'                    output_options=list(align_output=FALSE))
+#'                    optim_options=list(eta=1e-4,K_max=40,verbose=FALSE))
 #'
 #' #NOTE: both models fit with small optim_options$K_max=40 for demonstration
 #'
@@ -302,13 +298,25 @@ fase_seq <- function(A,d,self_loops=TRUE,
   if(is.null(optim_options$init_W)){
     if(is.null(optim_options$init_M)){
       if(is.null(optim_options$init_sigma)){
-        optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        # check if binary (checks if upper triangle of first snapshot takes 2 unique values)
+        if(length(unique(A[,,1][upper.tri(A[,,1])]))==2){
+          optim_options$init_sigma <- 0.5
+        }
+        else{
+          optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        }
       }
       optim_options$init_M <- Inf
     }
     if(is.null(optim_options$init_L)){
       if(is.null(optim_options$init_sigma)){
-        optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        # check if binary (checks if upper triangle of first snapshot takes 2 unique values)
+        if(length(unique(A[,,1][upper.tri(A[,,1])]))==2){
+          optim_options$init_sigma <- 0.5
+        }
+        else{
+          optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        }
       }
       optim_options$init_L <- min(max(floor((n*m / (optim_options$init_sigma^2))^(1/3)),1),m)
     }
@@ -332,9 +340,6 @@ fase_seq <- function(A,d,self_loops=TRUE,
     optim_options$init_W <- NA
   }
   # output parameter checking
-  if(is.null(output_options$align_output)){
-    output_options$align_output <- TRUE
-  }
   if(is.null(output_options$return_coords)){
     output_options$return_coords <- TRUE
     final_coords <- FALSE

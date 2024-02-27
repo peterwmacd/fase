@@ -121,8 +121,9 @@
 #'     and \eqn{n \times m \times d} for smoothing spline designs. If included,
 #'     \code{init_M}, \code{init_L} and \code{init_sigma} are ignored.}
 #'     \item{init_sigma}{A positive scalar, the estimated edge dispersion parameter to calibrate
-#'     initialization. If not provided, it is estimated using the robust method proposed by
-#'     Gavish and Donoho (2014).}
+#'     initialization. If not provided, it is either estimated using the robust method proposed by
+#'     Gavish and Donoho (2014) for weighted edge networks, or set to a default value \code{0.5}
+#'     for binary edge networks.}
 #'     \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
 #'     Defaults to the floor of \eqn{(nm/\texttt{init\_sigma}^2)^{1/3}}.}
 #'     \item{init_M}{A positive integer, the number of snapshots averaged in each group for
@@ -298,13 +299,25 @@ fase <- function(A,d,self_loops=TRUE,
   if(is.null(optim_options$init_W)){
     if(is.null(optim_options$init_M)){
       if(is.null(optim_options$init_sigma)){
-        optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        # check if binary (checks if upper triangle of first snapshot takes 2 unique values)
+        if(length(unique(A[,,1][upper.tri(A[,,1])]))==2){
+          optim_options$init_sigma <- 0.5
+        }
+        else{
+          optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        }
       }
       optim_options$init_M <- Inf
     }
     if(is.null(optim_options$init_L)){
       if(is.null(optim_options$init_sigma)){
-        optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        # check if binary (checks if upper triangle of first snapshot takes 2 unique values)
+        if(length(unique(A[,,1][upper.tri(A[,,1])]))==2){
+          optim_options$init_sigma <- 0.5
+        }
+        else{
+          optim_options$init_sigma <- mean(apply(A,3,estim_sigma_mad))
+        }
       }
       optim_options$init_L <- min(max(floor((n*m / (optim_options$init_sigma^2))^(1/3)),1),m)
     }
