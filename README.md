@@ -18,12 +18,10 @@ alignments of latent processes stored as 3-dimensional arrays.
 
 ## Installation
 
-You can install the development version of fase from
-[GitHub](https://github.com/peterwmacd) with:
+You can install fase from CRAN with:
 
 ``` r
-# install.packages("devtools")
-devtools::install_github("peterwmacd/fase")
+install.packages("fase")
 ```
 
 ## Example

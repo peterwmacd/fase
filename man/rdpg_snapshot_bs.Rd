@@ -39,7 +39,7 @@ If it is a vector, it corresponds to the Dirichlet parameter of the
 basis coordinates.
 If is is a scalar, the basis coordinates have Dirichlet parameter
 \code{rep(alpha_coord,d)}. Defaults to \code{0.1}.}
-\item{density}{A scalar between \code{0} and {1}, which controls the
+\item{density}{A scalar between \code{0} and \code{1}, which controls the
 approximate overall edge density of the resulting multiplex matrix.
 Defaults to \code{1/d}. If specified larger than \code{1/d}, this
 argument is reset to \code{1/d} and a warning is given.}
