@@ -80,7 +80,7 @@ initialization. If not provided, it is either estimated using the robust method 
 Gavish and Donoho (2014) for weighted edge networks, or set to a default value \code{0.5}
 for binary edge networks.}
 \item{init_L}{A positive integer, the number of contiguous groups used for initialization.
-Defaults to the floor of \eqn{(nm/\texttt{init\_sigma}^2)^{1/3}}.}
+Defaults to the floor of \eqn{(2nm/\texttt{init\_sigma}^2)^{1/3}}.}
 \item{init_M}{A positive integer, the number of snapshots averaged in each group for
 initialization. Defaults use all snapshots.}
 }}
