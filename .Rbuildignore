@@ -1,5 +1,8 @@
 ^fase\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^README\.md$
+^NEWS\.md$
 ^README\.Rmd$
 ^cran-comments.md$
+^cran-comments\.md$

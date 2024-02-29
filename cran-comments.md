@@ -1,5 +1,7 @@
 ## R CMD check results
-There were no ERRORs or WARNINGs or NOTEs.
 
-## Downstream dependencies
-This package has no downstream dependencies.
+0 errors | 0 warnings | 1 note
+
+* This is a new release.
+
+* Checking with flag --as-cran returns a note "Skipping checking math rendering: package 'V8' unavailable" which is unrelated to the package.

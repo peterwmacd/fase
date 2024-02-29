@@ -2,7 +2,7 @@ Package: fase
 Title: Functional Adjacency Spectral Embedding
 Version: 0.0.0.9000
 Authors@R: 
-    person("Peter W.", "MacDonald", , "pwmacdon@umich.edu", role = c("aut", "cre"),
+    person("Peter W.", "MacDonald", , "pwmacdon@umich.edu", role = c("aut", "cre", "cph"),
            comment = c(ORCID = "0000-0001-7024-7242"))
 Description: Latent process embedding for functional network data with the Functional Adjacency Spectral Embedding (FASE). Fits smooth latent processes based on cubic spline bases. Also generates functional network data from three models, and evaluates a network generalized cross-validation criterion for dimension selection.
 License: GPL (>= 3)
