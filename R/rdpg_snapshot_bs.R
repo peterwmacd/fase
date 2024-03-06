@@ -190,7 +190,7 @@ rdpg_snapshot_bs <- function(n,d,
   }
   # parameter checking
   if(process_options$density > (1/d)){
-    cat(paste0('requested density is too high, networks will have edge density approximately ',round(1/d,2),'\n'))
+    warning(paste0('requested density is too high, networks will have edge density approximately ',round(1/d,2),'\n'))
     process_options$density <- 1/d
   }
   # populate Theta, A

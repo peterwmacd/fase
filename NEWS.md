@@ -1,3 +1,3 @@
-# fase (development version)
+# fase 1.0.0
 
 * Initial CRAN submission.
