@@ -13,7 +13,12 @@ local_orth_embed <- function(A,d,
   Z_tilde <- array(0,c(n,d,L))
   for(ll in 1:L){
     iloc <- midM(which(groups==ll),M)
-    temp <- ase(apply(A[,,iloc],c(1,2),mean),d,positive=TRUE)
+    if(length(iloc) > 1){
+      temp <- ase(apply(A[,,iloc],c(1,2),mean),d,positive=TRUE)
+    }
+    else{
+      temp <- ase(A[,,iloc],d,positive=TRUE)
+    }
     if(ll > 1){
       if(is.matrix(temp)){
         Z_tilde[,,ll] <- proc_align(temp,Z_tilde[,,ll-1])
